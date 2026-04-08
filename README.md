@@ -1,4 +1,5 @@
 # 🌱 Azure Governance Bot
+<img width="2048" height="2048" alt="Gemini_Generated_Image_6spy9f6spy9f6spy" src="https://github.com/user-attachments/assets/34227b20-7f3b-4a80-bba2-b3eaa39d3cdb" />
 
 [![Azure](https://img.shields.io/badge/Provider-Azure-blue.svg)](https://azure.microsoft.com/)
 [![Python](https://img.shields.io/badge/Language-Python-green.svg)](https://www.python.org/)
