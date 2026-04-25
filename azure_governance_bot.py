@@ -80,7 +80,15 @@ class AzureGovernanceBot:
 
             for rg in resource_groups:
                 tags = rg.tags or {}
-                missing_tags = [t for t in mandatory_tags if t not in tags]
+                missing_tags = [
+                    t
+                    for t in mandatory_tags
+                    if tags.get(t) is None
+                    or (
+                        isinstance(tags.get(t), str)
+                        and not tags.get(t).strip()
+                    )
+                ]
 
                 if missing_tags:
                     logger.warning(
@@ -118,3 +126,4 @@ if __name__ == "__main__":
         bot.cleanup_preview()
     except Exception as e:
         logger.critical("Bot failed to start: %s", e)
+        raise SystemExit(1) from e
