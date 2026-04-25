@@ -127,6 +127,50 @@ class TestAuditTags:
 
     @patch("azure_governance_bot.ResourceManagementClient")
     @patch("azure_governance_bot.DefaultAzureCredential")
+    def test_empty_string_tag_is_non_compliant(self, _cred, mock_client_cls):
+        mock_client = MagicMock()
+        mock_client.resource_groups.list.return_value = [
+            _make_rg(
+                "rg-empty-owner",
+                {
+                    "CostCenter": "123",
+                    "Owner": "",
+                    "Environment": "prod",
+                },
+            ),
+        ]
+        mock_client_cls.return_value = mock_client
+
+        bot = AzureGovernanceBot(subscription_id="sub")
+        result = bot.audit_tags()
+
+        assert result.non_compliant_count == 1
+        assert result.non_compliant["rg-empty-owner"] == ["Owner"]
+
+    @patch("azure_governance_bot.ResourceManagementClient")
+    @patch("azure_governance_bot.DefaultAzureCredential")
+    def test_whitespace_tag_is_non_compliant(self, _cred, mock_client_cls):
+        mock_client = MagicMock()
+        mock_client.resource_groups.list.return_value = [
+            _make_rg(
+                "rg-space-env",
+                {
+                    "CostCenter": "123",
+                    "Owner": "alice",
+                    "Environment": "   ",
+                },
+            ),
+        ]
+        mock_client_cls.return_value = mock_client
+
+        bot = AzureGovernanceBot(subscription_id="sub")
+        result = bot.audit_tags()
+
+        assert result.non_compliant_count == 1
+        assert result.non_compliant["rg-space-env"] == ["Environment"]
+
+    @patch("azure_governance_bot.ResourceManagementClient")
+    @patch("azure_governance_bot.DefaultAzureCredential")
     def test_custom_mandatory_tags(self, _cred, mock_client_cls):
         mock_client = MagicMock()
         mock_client.resource_groups.list.return_value = [
