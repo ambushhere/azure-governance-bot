@@ -12,12 +12,12 @@ An automated tool for auditing resources in Microsoft Azure.
 - **CI/CD Ready**: Lint & test pipeline via GitHub Actions (no Azure subscription required).
 - **FinOps Focused**: Identifies unused resources to reduce cloud spend (preview).
 
-📈 Result / Impact
+## 📈 Result / Impact
 
-• Improved governance quality by validating required tags (CostCenter, Owner, Environment) across resource groups.
-• Increased reliability with automated CI checks (tests + lint) on each push/PR.
-• Added stricter compliance logic to detect empty/whitespace tag values (not only missing keys).
-• Hardened runtime behavior by returning non-zero exit code on startup/config errors, making failures visible in automation pipelines.
+- Improved governance quality by validating required tags (CostCenter, Owner, Environment) across resource groups.
+- Increased reliability with automated CI checks (tests + lint) on each push/PR.
+- Added stricter compliance logic to detect empty/whitespace tag values (not only missing keys).
+- Hardened runtime behavior by returning non-zero exit code on startup/config errors, making failures visible in automation pipelines.
 
 ### 📋 Setup
 
