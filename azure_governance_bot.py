@@ -47,7 +47,8 @@ class AzureGovernanceBot:
     Authentication is handled via DefaultAzureCredential, which supports:
         - Managed Identity (recommended for production)
         - Azure CLI (for local development)
-        - Environment variables (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID)
+        - Environment variables (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET,
+          AZURE_TENANT_ID)
     """
 
     def __init__(self, subscription_id: Optional[str] = None):
@@ -81,7 +82,7 @@ class AzureGovernanceBot:
         if mandatory_tags is None:
             mandatory_tags = list(DEFAULT_MANDATORY_TAGS)
 
-        # FIX: mask subscription_id in logs to avoid leaking it to log aggregators
+        # FIX: mask subscription_id in logs to avoid leaking it to aggregators
         masked_id = "***" + self.subscription_id[-4:]
         logger.info(
             "--- Starting tag audit for subscription: %s ---",
@@ -123,7 +124,7 @@ class AzureGovernanceBot:
         # FIX: catch specific Azure exceptions instead of broad Exception
         except ClientAuthenticationError as e:
             logger.error(
-                "❌ Authentication failed. Check your credentials and RBAC role assignment: %s",
+                "❌ Authentication failed. Check credentials and RBAC role: %s",
                 e.message,
             )
             raise
