@@ -1,8 +1,9 @@
-import os
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from azure.core.exceptions import ClientAuthenticationError, HttpResponseError
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import ResourceManagementClient
 
@@ -36,17 +37,29 @@ class AzureGovernanceBot:
     """
     Automates resource auditing in Microsoft Azure.
     Helps maintain tagging compliance and optimize costs.
+
+    Required Azure RBAC role: Reader (at subscription scope).
+    Do NOT assign Contributor or higher — this bot is read-only.
+
+    Required environment variables:
+        AZURE_SUBSCRIPTION_ID — the target Azure subscription ID.
+
+    Authentication is handled via DefaultAzureCredential, which supports:
+        - Managed Identity (recommended for production)
+        - Azure CLI (for local development)
+        - Environment variables (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET,
+          AZURE_TENANT_ID)
     """
 
     def __init__(self, subscription_id: Optional[str] = None):
-        self.subscription_id = (
-            subscription_id or os.getenv("AZURE_SUBSCRIPTION_ID")
-        )
-        if not self.subscription_id:
+        _sub_id = subscription_id or os.getenv("AZURE_SUBSCRIPTION_ID")
+        if not _sub_id:
             raise ValueError(
                 "AZURE_SUBSCRIPTION_ID must be set as an environment variable "
                 "or passed to the constructor."
             )
+        # Explicitly typed as str (not Optional) after validation
+        self.subscription_id: str = _sub_id
 
         self.credential = DefaultAzureCredential()
         self.client = ResourceManagementClient(
@@ -69,9 +82,11 @@ class AzureGovernanceBot:
         if mandatory_tags is None:
             mandatory_tags = list(DEFAULT_MANDATORY_TAGS)
 
+        # FIX: mask subscription_id in logs to avoid leaking it to aggregators
+        masked_id = "***" + self.subscription_id[-4:]
         logger.info(
             "--- Starting tag audit for subscription: %s ---",
-            self.subscription_id,
+            masked_id,
         )
         result = AuditResult()
 
@@ -106,8 +121,26 @@ class AzureGovernanceBot:
                 result.compliant_count,
                 result.non_compliant_count,
             )
+        # FIX: catch specific Azure exceptions instead of broad Exception
+        except ClientAuthenticationError as e:
+            logger.error(
+                "❌ Authentication failed. Check credentials and RBAC role: %s",
+                e.message,
+            )
+            raise
+        except HttpResponseError as e:
+            logger.error(
+                "❌ Azure API error (status %s): %s",
+                e.status_code,
+                e.message,
+            )
+            raise
         except Exception as e:
-            logger.error("❌ Critical error during audit execution: %s", e)
+            # Fallback for truly unexpected errors (e.g. network issues)
+            logger.error(
+                "❌ Critical error during audit execution: %s",
+                e,
+            )
             raise
 
         return result
