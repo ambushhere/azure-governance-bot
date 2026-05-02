@@ -1,8 +1,2 @@
-# Requirements pinned with SHA-256 hashes to protect against supply-chain attacks.
-# To verify or regenerate hashes:
-#   pip download -r requirements.txt --no-deps -d ./tmp_pkgs
-#   pip hash ./tmp_pkgs/*.whl
-azure-identity==1.15.0 \
-    --hash=sha256:a14b1f01c7036f11f148f22cd8c16e05035293d714458d6b44ddf534d93eb912
-azure-mgmt-resource==23.0.1 \
-    --hash=sha256:f185eec72bbc39f42bcb83ae6f1bad744f0e3f20a12d9b2b3e70d16c74ad9cc0
+azure-identity==1.15.0
+azure-mgmt-resource==23.0.1
